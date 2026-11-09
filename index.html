@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			name="description"
+			content="Meet Madam Wasabe, your warm, witty AI bestie. Bring the big feelings, little wins, and all the tea."
+		/>
+		<title>Madam Wasabe | Your AI bestie</title>
+		<style>
+			body {
+				margin: 0;
+				min-height: 100svh;
+				display: grid;
+				place-items: center;
+				background: #fff0f6;
+				color: #704b76;
+				font-family: system-ui, sans-serif;
+				text-align: center;
+			}
+			main {
+				box-sizing: border-box;
+				width: 100%;
+				max-width: 428px;
+				padding: 32px 24px 160px;
+			}
+			svg {
+				width: 220px;
+				max-width: 100%;
+			}
+			h1 {
+				margin: 20px 0 12px;
+				font-size: clamp(28px, 6vw, 40px);
+				line-height: 1.15;
+			}
+			p {
+				margin: 16px auto;
+				line-height: 1.6;
+			}
+			.name {
+				display: table;
+				padding: 6px 14px;
+				border-radius: 24px;
+				background: #e9ddfa;
+				font-size: 14px;
+				font-weight: 600;
+			}
+			.hint {
+				font-size: 14px;
+			}
+			@media (min-width: 768px) {
+				body {
+					box-sizing: border-box;
+					padding-right: var(--chat-space, 0px);
+				}
+				elevenlabs-convai {
+					left: 50%;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<svg viewBox="0 0 240 200" role="img" aria-labelledby="avatar-title">
+				<title id="avatar-title">Cute pink axolotl with rosy cheeks</title>
+				<circle cx="120" cy="100" r="95" fill="#e9ddfa" />
+				<g stroke="#e49aba" stroke-width="12" stroke-linecap="round">
+					<path d="M65 80 40 50M60 100H25M65 120l-25 30" />
+					<path d="m175 80 25-30m-20 50h35m-40 20 25 30" />
+				</g>
+				<ellipse
+					cx="120"
+					cy="105"
+					rx="75"
+					ry="60"
+					fill="#ffd0e2"
+					stroke="#cf8daa"
+					stroke-width="3"
+				/>
+				<ellipse cx="77" cy="120" rx="14" ry="8" fill="#f3a0be" />
+				<ellipse cx="163" cy="120" rx="14" ry="8" fill="#f3a0be" />
+				<g fill="#624268">
+					<circle cx="90" cy="100" r="7" />
+					<circle cx="150" cy="100" r="7" />
+				</g>
+				<g fill="white">
+					<circle cx="88" cy="98" r="2" />
+					<circle cx="148" cy="98" r="2" />
+				</g>
+				<path
+					d="M110 118q5 9 10 1 5 8 10-1"
+					fill="none"
+					stroke="#624268"
+					stroke-width="3"
+					stroke-linecap="round"
+				/>
+			</svg>
+			<p class="name">Madam Wasabe &middot; Your AI bestie</p>
+			<h1>Hey bestie. What's the tea?</h1>
+			<p>
+				Big feelings? Little wins? A day that needs a dramatic retelling?
+				Pull up a seat. I'm all ears, a little sass, and very much on your team.
+			</p>
+			<p class="hint">
+				No perfect words needed. Tap the chat widget and say hello.
+				Allow microphone access when prompted &mdash; this bestie needs to hear you.
+			</p>
+			<noscript>Enable JavaScript so we can have our little catch-up.</noscript>
+		</main>
+		<elevenlabs-convai
+			placement="bottom-right"
+			action-text="Hey bestie!"
+			start-call-text="Let's chat"
+			end-call-text="End our chat"
+			expand-text="Come on in"
+			listening-text="I'm all ears..."
+			speaking-text="Bestie has thoughts..."
+		></elevenlabs-convai>
+		<script src="config.js"></script>
+		<script>
+			const widget = document.querySelector("elevenlabs-convai");
+			if (typeof window.AGENT_ID !== "string" || !/^agent_[a-zA-Z0-9]+$/.test(window.AGENT_ID.trim())) {
+				const message = document.createElement("p");
+				message.setAttribute("role", "alert");
+				message.textContent = "Bestie isn't set up yet! Copy config.example.js to config.js and add your ElevenLabs agent ID.";
+				document.querySelector("main").append(message);
+				console.error("Missing or invalid AGENT_ID in config.js.");
+				widget.remove();
+			} else {
+				widget.setAttribute("agent-id", window.AGENT_ID.trim());
+				customElements.whenDefined("elevenlabs-convai").then(() => {
+					let sheet;
+					const resizeObserver = new ResizeObserver(updateLayout);
+
+					function updateLayout() {
+						// The widget's open panel lives inside its shadow DOM.
+						const openSheet = widget.shadowRoot.querySelector('.sheet[data-shown="true"]');
+						if (sheet !== openSheet) {
+							if (sheet) resizeObserver.unobserve(sheet);
+							sheet = openSheet;
+							if (sheet) resizeObserver.observe(sheet);
+						}
+						const space = sheet && window.innerWidth >= 768
+							? Math.max(0, window.innerWidth - sheet.getBoundingClientRect().left + 24)
+							: 0;
+						document.body.style.setProperty("--chat-space", `${space}px`);
+					}
+
+					new MutationObserver(updateLayout).observe(widget.shadowRoot, {
+						childList: true,
+						subtree: true,
+						attributes: true,
+						attributeFilter: ["data-shown", "data-variant", "class", "style"],
+					});
+					window.addEventListener("resize", updateLayout);
+					updateLayout();
+				});
+			}
+		</script>
+		<script
+			src="https://unpkg.com/@elevenlabs/convai-widget-embed"
+			async
+			type="text/javascript"
+		></script>
+	</body>
+</html>

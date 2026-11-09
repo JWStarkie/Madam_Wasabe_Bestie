@@ -1,0 +1,6 @@
+# Local secrets written by `elevenlabs onboard`
+/.env.local
+
+# Local agent settings
+/config.js
+/Madam Wasabe config.json
